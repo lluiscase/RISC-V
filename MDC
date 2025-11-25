@@ -1,0 +1,30 @@
+.section .data
+x:      .word 48
+y:      .word 18
+
+.section .text
+.globl _start
+
+_start:
+    # 1. CARREGAMENTO SEGURO
+    la t0, x        # Carrega o endereço de x em t0
+    lw a0, 0(t0)    # a0 (dividendo) = 48
+    
+    la t0, y        # Carrega o endereço de y em t0
+    lw a1, 0(t0)    # a1 (divisor) = 18
+
+# 2. ALGORITMO MDC (INLINE)
+mdc_loop:
+    beq a1, zero, done_inline  # Se divisor a1 for zero, a0 tem o MDC
+    
+    rem t0, a0, a1             # t0 = a0 % a1 (resto)
+    mv a0, a1                  # Novo dividendo a0 = antigo divisor a1
+    mv a1, t0                  # Novo divisor a1 = resto
+    
+    j mdc_loop                 # Volta para o loop
+
+done_inline:
+    # 3. SAÍDA LIMPA OBRIGATÓRIA
+    # O resultado (6) já está em a0 e é usado como código de retorno.
+    li a7, 93       # Syscall exit
+    ecall
